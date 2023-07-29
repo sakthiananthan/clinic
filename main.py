@@ -5,6 +5,7 @@ import utils.json_utils as js
 app=Flask(__name__)
 USER_FILE="data/user.json"
 PATIENT_FILE="data/patient.json"
+SUMMARY_FILE="data/summary.json"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -34,8 +35,45 @@ def login(username,password):
     for user in user_data["users"]:
         if user["username"]==username and user["password"]==password:
             session["name"]="sakthi"
+            session["msg"]=""
             login=True
     return login
+
+def calc_summary():
+    data=js.read_json(PATIENT_FILE)
+    summary_data=js.read_json(SUMMARY_FILE)
+    treatment_total=0
+    lab_cost_total=0
+    pat_bal_total=0
+    lab_bal_total=0
+    lab_paid_total=0
+    pat_paid_total=0
+    for pid,pdata in data.items():
+        treatment_total=treatment_total+pdata["Total"]
+        lab_cost_total=lab_cost_total+pdata["Lab_cost"]
+        pat_bal_total=pat_bal_total+pdata["patient_balance"]
+        lab_bal_total=lab_bal_total+pdata["Lab_balance"]
+        lab_paid_total=lab_paid_total+pdata["Lab_paid"]
+        pat_paid_total=pat_paid_total+pdata["Advance"]
+    summary_data["Treatment_total"]=treatment_total
+    summary_data["lab_cost_total"]=lab_cost_total
+    summary_data["pat_bal_total"]=pat_bal_total
+    summary_data["lab_bal_total"]=lab_bal_total
+    summary_data["lab_paid_total"]=lab_paid_total
+    summary_data["pat_paid_total"]=pat_paid_total
+    js.writejson(summary_data,SUMMARY_FILE)
+    return summary_data
+        
+@app.route("/home",methods=["POST","GET"])
+def home_redirect():
+    if checkauth():
+        data=js.read_json(PATIENT_FILE)
+        msg=session["msg"]
+        session["msg"]=""
+        return render_template("home.html",data=data,summary=calc_summary(),msg=msg)
+    else:
+        return redirect("/")
+    
 
 @app.route("/logout", methods=["POST","GET"])
 def logout():
@@ -43,17 +81,33 @@ def logout():
       for key in list(session.keys()):
             session.pop(key)
       return redirect("/")
-  
+
+@app.route("/update/<pid>", methods=["POST","GET"])
+def update(pid):
+    if checkauth():
+        data=js.read_json(PATIENT_FILE)
+        for pt in data.keys():
+            if pt==pid:
+                data[pid]["Name"]=request.form["name"]
+                data[pid]["Contact"]=request.form["cnt"]
+                data[pid]["Work"]=request.form["work"]
+                data[pid]["Total"]=int(request.form["total"])
+                data[pid]["patient_balance"]=data[pid]["Total"]-data[pid]["Advance"]
+        js.writejson(data,PATIENT_FILE)
+        return redirect("/home")
+    else:
+        return redirect("/")
+            
+    
 @app.route("/add_pt", methods=["POST","GET"])
 def add_pt():
-    msg=""
     if checkauth():
         data=js.read_json(PATIENT_FILE)
         if request.method=="POST":
             pid=get_pid()
             if pid=="fail":
-                msg="Error ! Unable to register... Please contact admin..."
-                return render_template("home.html",msg=msg,data=data)
+                session["msg"]="Error ! Unable to register... Please contact admin..."
+                return redirect("/home")
             if request.form["advance"]=="":
                 advance=0
             else:
@@ -74,13 +128,12 @@ def add_pt():
                 "Lab_balance": lab_cst
             }
             js.writejson(data,PATIENT_FILE)
-        return render_template("home.html",data=data)
+        return redirect("/home")
     return redirect("/")
         
 @app.route("/payment",methods=["POST","GET"])
 def payment():
     if checkauth():
-        msg=""
         data=js.read_json(PATIENT_FILE)
         if request.method=="POST":
             pid=request.form["pid"]
@@ -92,9 +145,9 @@ def payment():
                 data[pid]["Advance"]=data[pid]["Advance"]+int(request.form["amount"])
                 data[pid]["patient_balance"]=data[pid]["Total"]-data[pid]["Advance"]
             else:
-                msg="Unable to make paymet please contact admin"
+                session["msg"]="Unable to make paymet please contact admin"
             js.writejson(data,PATIENT_FILE)
-        return render_template("home.html",data=data,msg=msg)
+        return redirect("/home")
     return redirect("/")
 
 @app.route("/", methods=["POST","GET"])
@@ -102,8 +155,7 @@ def home():
     msg=""
     if request.method=="POST":
         if login(request.form["username"],request.form["password"]):
-            data=js.read_json(PATIENT_FILE)
-            return render_template("home.html",data=data)
+            return redirect("/home")
         else:
             msg="Invalid credentials"
     return render_template("login.html",msg=msg)

@@ -23,8 +23,8 @@
                 Patient Dashboard
             </div>
             <div class="col-2"></div>
-            <div class="col-2">
-                <a href="/logout" class="btn btn-outline-primary btn-sm mt-2" style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">Logout</a>
+            <div class="col-2 text-end">
+                <a href="/logout" class="btn btn-outline-primary btn-md mt-2">Logout</a>
             </div>
         </div>
         <div class="row">
@@ -87,22 +87,34 @@
                       </thead> 
                       <tbody>
                         {% for key, value in data.items() %}
-                        <form action="/patient/{{key}}" method="post">
+                        <form action="/update/{{ key }}" method="post">
                         <tr>
                             <td>{{ key }}</td>
                             <td><input type="text" value=' {{ value["Name"] }}' name="name"  style="max-width: 100px; text-align: center; "></td>
                             <td><input type="text" value=' {{ value["Contact"] }}' name="cnt"  style="max-width: 100px; text-align: center; "></td>
                             <td><input type="text" value=' {{ value["Work"] }}' name="work"  style="max-width: 60px; text-align: center; "></td>
-                            <td>{{ value["Total"] }}</td>
+                            <td><input type="number" value='{{ value["Total"] }}' name="total" style="max-width: 60px; text-align: center; "></td>
                             <td>{{ value["Advance"] }}</td>
                             <td>{{ value["Lab_cost"] }}</td>
                             <td>{{ value["Lab_paid"] }}</td>
                             <td>{{ value["Lab_balance"] }}</td>
                             <td>{{ value["patient_balance"] }}</td>
-                            <td> <a href="" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i></a> <a href="" class="btn-sm btn btn-outline-danger"><i class="fa-solid fa-box-archive"></i></a></td>
+                            <td> <button type="submit" class="btn btn-outline-warning btn-sm"><i class="fas fa-save"></i></button> <a href="/archive/{{ key }}" class="btn-sm btn btn-outline-danger"><i class="fa-solid fa-box-archive"></i></a></td>
                           </tr>
                           </form>
                           {% endfor %}
+                        <tr>
+
+                          <td colspan="2"></td>
+                          <td colspan="2">Total</td>
+                          <td>{{ summary.Treatment_total }}</td>
+                          <td>{{ summary.pat_paid_total}}</td>
+                          <td>{{ summary.lab_cost_total }}</td>
+                          <td>{{ summary.lab_paid_total }}</td>
+                          <td>{{ summary.lab_bal_total }}</td>
+                          <td>{{ summary.pat_bal_total }}</td>
+                          <td><button type="button" class="btn btn-danger btn-sm">Archive All</button></td>
+                        </tr>
                       </tbody> 
                   </table>
 
