@@ -1,8 +1,8 @@
 {
-   "Treatment_total": 15000,
-   "lab_cost_total": 4000,
-   "pat_bal_total": 8000,
+   "Treatment_total": 0,
+   "lab_cost_total": 0,
+   "pat_bal_total": 0,
    "lab_bal_total": 0,
-   "lab_paid_total": 4000,
-   "pat_paid_total": 7000
+   "lab_paid_total": 0,
+   "pat_paid_total": 0
 }

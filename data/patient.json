@@ -1,24 +1,2 @@
 {
-   "p_001": {
-      "Name": " test",
-      "Contact": " test",
-      "Work": " test",
-      "Total": 8000,
-      "Advance": 0,
-      "Lab_cost": 2000,
-      "Lab_paid": 2000,
-      "patient_balance": 8000,
-      "Lab_balance": 0
-   },
-   "p_002": {
-      "Name": "  test2",
-      "Contact": "  test2",
-      "Work": "  test",
-      "Total": 7000,
-      "Advance": 7000,
-      "Lab_cost": 2000,
-      "Lab_paid": 2000,
-      "patient_balance": 0,
-      "Lab_balance": 0
-   }
 }
